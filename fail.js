@@ -1,3 +1,5 @@
+"use strict";
+
 function fail(errorCb, successCb, context) {
     return function () {
         var args = Array.prototype.slice.call(arguments),
