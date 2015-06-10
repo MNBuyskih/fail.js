@@ -3,9 +3,7 @@
 function fail(errorCb, successCb, context) {
     if (arguments.length === 1) {
         successCb = errorCb;
-        errorCb = function (error) {
-            console.error(error);
-        };
+        errorCb = fail.error;
     }
 
     return function () {
@@ -22,6 +20,30 @@ fail.noop = function () {
 
 fail.success = function (successCb) {
     return fail(fail.noop, successCb);
+};
+
+fail.error = function (error) {
+    console.error(error);
+};
+
+fail.express = function (status, behavior) {
+    if (!status) {
+        status = 400;
+    }
+
+    if (!behavior) {
+        behavior = function (response) {
+            return function (error) {
+                console.error(error);
+                response.status(400).end(error.toString());
+            };
+        };
+    }
+
+    return function (request, response, next) {
+        fail.error = behavior(response);
+        next();
+    };
 };
 
 module.exports = fail;
